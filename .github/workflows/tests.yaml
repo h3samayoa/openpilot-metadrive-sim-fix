@@ -201,6 +201,10 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
+    - name: Fetch LFS models from upstream commaai (driving models not in fork's LFS)   # TEMP repro #30693 (revert: remove step)
+      run: |
+        git config lfs.url https://github.com/commaai/openpilot.git/info/lfs
+        git -c http.https://github.com/.extraheader= lfs pull
     - run: ./tools/op.sh setup
     - name: Build openpilot
       run: scons
@@ -213,7 +217,7 @@ jobs:
         source selfdrive/test/setup_xvfb.sh
         echo "[TIMING] ===== pytest starting $(date -u +%H:%M:%S) ====="
         # pytest -s tools/sim/tests/test_metadrive_bridge.py   # TEMP repro #30693: original (revert: uncomment, drop timed line below)
-        time pytest -s --durations=0 tools/sim/tests/test_metadrive_bridge.py
+        time pytest -s -n0 --durations=0 tools/sim/tests/test_metadrive_bridge.py
         echo "[TIMING] ===== pytest finished $(date -u +%H:%M:%S) ====="
 
   create_ui_report:

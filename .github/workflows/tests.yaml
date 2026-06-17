@@ -201,10 +201,11 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    - name: Fetch LFS models from upstream commaai (driving models not in fork's LFS)   # TEMP repro #30693 (revert: remove step)
+    - name: Fetch LFS driving models (openpilot LFS lives on GitLab, see .lfsconfig)   # TEMP repro #30693 (revert: remove step)
       run: |
-        git config lfs.url https://github.com/commaai/openpilot.git/info/lfs
-        git -c http.https://github.com/.extraheader= lfs pull
+        git config lfs.url https://gitlab.com/commaai/openpilot-lfs.git/info/lfs
+        git lfs pull --include="selfdrive/modeld/models/*"
+        echo "[LFS] models after pull:"; ls -la selfdrive/modeld/models/*.onnx; file selfdrive/modeld/models/driving_supercombo.onnx
     - run: ./tools/op.sh setup
     - name: Build openpilot
       run: scons

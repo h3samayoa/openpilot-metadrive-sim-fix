@@ -196,19 +196,26 @@ jobs:
       (github.event.pull_request.head.repo.full_name == 'commaai/openpilot'))
       && fromJSON('["namespace-profile-amd64-8x16"]')
       || fromJSON('["ubuntu-24.04"]') }}
-    if: false  # FIXME: Started to timeout recently
+      #if: false  # FIXME: Started to timeout recently   # TEMP repro #30693: re-enabled to measure timing (revert: uncomment)
     steps:
     - uses: actions/checkout@v6
       with:
         submodules: true
+        lfs: true   # TEMP repro #30693: pull real .onnx models (LFS) so modeld can load (revert: remove)
     - run: ./tools/op.sh setup
     - name: Build openpilot
       run: scons
     - name: Driving test
-      timeout-minutes: 2
+      # timeout-minutes: 2   # TEMP repro #30693: original 2-min budget that times out (revert: uncomment, drop the 20 below)
+      timeout-minutes: 20
+      env:
+        PYTHONUNBUFFERED: '1'
       run: |
         source selfdrive/test/setup_xvfb.sh
-        pytest -s tools/sim/tests/test_metadrive_bridge.py
+        echo "[TIMING] ===== pytest starting $(date -u +%H:%M:%S) ====="
+        # pytest -s tools/sim/tests/test_metadrive_bridge.py   # TEMP repro #30693: original (revert: uncomment, drop timed line below)
+        time pytest -s --durations=0 tools/sim/tests/test_metadrive_bridge.py
+        echo "[TIMING] ===== pytest finished $(date -u +%H:%M:%S) ====="
 
   create_ui_report:
     name: Create UI Report

@@ -22,6 +22,7 @@ class TestSimBridgeBase:
 
   def test_driving(self):
     # Startup manager and bridge.py. Check processes are running, then engage and verify.
+    t0 = time.monotonic()  # [TIMING] issue #30693 repro (revert: remove t0 + [TIMING] prints)
     p_manager = subprocess.Popen("./launch_openpilot.sh", cwd=SIM_DIR)
     self.processes.append(p_manager)
 
@@ -38,6 +39,7 @@ class TestSimBridgeBase:
     while not bridge.started.value and time.monotonic() < start_waiting + max_time_per_step:
       time.sleep(0.1)
     assert p_bridge.exitcode is None, f"Bridge process should be running, but exited with code {p_bridge.exitcode}"
+    print(f"[TIMING] bridge.started after {time.monotonic() - t0:.1f}s", flush=True)
 
     start_time = time.monotonic()
     no_car_events_issues_once = False
@@ -55,6 +57,7 @@ class TestSimBridgeBase:
 
     assert no_car_events_issues_once, \
                     f"Failed because no messages received, or CarEvents '{car_event_issues}' or processes not running '{not_running}'"
+    print(f"[TIMING] all processes alive + no blocking car events after {time.monotonic() - t0:.1f}s", flush=True)
 
     start_time = time.monotonic()
     min_counts_control_active = 100
@@ -70,10 +73,12 @@ class TestSimBridgeBase:
           break
 
     assert min_counts_control_active == control_active, f"Simulator did not engage a minimal of {min_counts_control_active} steps was {control_active}"
+    print(f"[TIMING] {min_counts_control_active} control-active steps reached after {time.monotonic() - t0:.1f}s", flush=True)
 
     failure_states = []
     while bridge.started.value:
       continue
+    print(f"[TIMING] drive finished, bridge stopped after {time.monotonic() - t0:.1f}s", flush=True)
 
     while not q.empty():
       state = q.get()

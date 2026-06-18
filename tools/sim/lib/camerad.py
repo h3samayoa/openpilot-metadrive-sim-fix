@@ -64,10 +64,12 @@ class Camerad:
     return rgb_to_nv12(rgb)
 
   def _send_yuv(self, yuv, frame_id, pub_type, yuv_type):
-    eof = int(frame_id * 0.05 * 1e9)
+    dat = messaging.new_message(pub_type, valid=True)
+    # B (#30693): real-clock frame timestamp (same base as the IMU's logMonoTime) so cameraOdometry
+    # lands on locationd's timeline, instead of the synthetic eof = int(frame_id * 0.05 * 1e9).
+    eof = dat.logMonoTime
     self.vipc_server.send(yuv_type, yuv, frame_id, eof, eof)
 
-    dat = messaging.new_message(pub_type, valid=True)
     msg = {
       "frameId": frame_id,
       "transform": [1.0, 0.0, 0.0,

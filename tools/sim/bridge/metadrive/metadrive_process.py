@@ -59,8 +59,11 @@ def metadrive_process(dual_camera: bool, config: dict, camera_array, wide_camera
     assert wide_camera_array is not None
     wide_road_image = np.frombuffer(wide_camera_array.get_obj(), dtype=np.uint8).reshape((H, W, 3))
 
-  env = MetaDriveEnv(config)
+  # A (#30693): step env every Nth 100Hz tick to keep sim real-time (== TICKS_PER_FRAME).
+  # Read before env creation since MetaDriveEnv may mutate config.
   step_every = max(1, int(round(config.get("physics_world_step_size", 0.05) * 100)))
+  print(f"[STEP] step_every={step_every}", flush=True)  # TEMP repro #30693
+  env = MetaDriveEnv(config)
 
   def get_current_lane_info(vehicle):
     _, lane_info, on_lane = vehicle.navigation._get_current_lane(vehicle)

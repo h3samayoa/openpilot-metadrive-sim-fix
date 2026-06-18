@@ -195,12 +195,7 @@ jobs:
     - uses: actions/checkout@v6
       with:
         submodules: true
-    - name: Fetch LFS driving models (openpilot LFS lives on GitLab, see .lfsconfig)   # TEMP repro #30693 (revert: remove step)
-      run: |
-        git config lfs.url https://gitlab.com/commaai/openpilot-lfs.git/info/lfs
-        git lfs pull --include="selfdrive/modeld/models/*"
-        echo "[LFS] models after pull:"; ls -la selfdrive/modeld/models/*.onnx; file selfdrive/modeld/models/driving_supercombo.onnx
-    - run: ./tools/op.sh setup
+    - run: ./tools/op.sh setup   # also does `git lfs pull` via .lfsconfig (GitLab) — same path the other jobs use
     - name: Build openpilot
       run: scons
     - name: Driving test

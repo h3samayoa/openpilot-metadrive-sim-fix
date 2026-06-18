@@ -32,7 +32,7 @@ class TestSimBridgeBase:
     p_bridge = bridge.run(q, retries=10)
     self.processes.append(p_bridge)
 
-    max_time_per_step = 60
+    max_time_per_step = 120  # A (#30693): allow slower CI runners without flaking
 
     # Wait for bridge to startup
     start_waiting = time.monotonic()

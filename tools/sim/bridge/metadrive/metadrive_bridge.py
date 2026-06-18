@@ -48,7 +48,7 @@ def create_map(track_size=60):
 
 
 class MetaDriveBridge(SimulatorBridge):
-  TICKS_PER_FRAME = 5
+  TICKS_PER_FRAME = 10  # A (#30693): lower camera framerate (20->10fps) so the sim stays real-time on slow CI runners
 
   def __init__(self, dual_camera, high_quality, test_duration=math.inf, test_run=False):
     super().__init__(dual_camera, high_quality)

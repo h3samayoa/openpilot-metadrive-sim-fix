@@ -52,6 +52,9 @@ def metadrive_process(dual_camera: bool, config: dict, camera_array, wide_camera
                       controls_recv: Connection, simulation_state_send: Connection, vehicle_state_send: Connection,
                       exit_event, op_engaged, test_duration, test_run):
   arrive_dest_done = config.pop("arrive_dest_done", True)
+  # A (#30693): step the env every Nth 100Hz tick so sim-time tracks wall-time (real-time factor = 1).
+  # N = 100 * physics_world_step_size, which equals TICKS_PER_FRAME (=10 -> step at 10Hz, 0.1s steps).
+  step_every = max(1, round(config["physics_world_step_size"] * 100))
   apply_metadrive_patches(arrive_dest_done)
 
   road_image = np.frombuffer(camera_array.get_obj(), dtype=np.uint8).reshape((H, W, 3))
@@ -124,7 +127,7 @@ def metadrive_process(dual_camera: bool, config: dict, camera_array, wide_camera
     if is_engaged and start_time is None:
       start_time = time.monotonic()
 
-    if rk.frame % 5 == 0:
+    if rk.frame % step_every == 0:
       _, _, terminated, _, _ = env.step(vc)
       timeout = True if start_time is not None and time.monotonic() - start_time >= test_duration else False
       lane_idx_curr, on_lane = get_current_lane_info(env.vehicle)

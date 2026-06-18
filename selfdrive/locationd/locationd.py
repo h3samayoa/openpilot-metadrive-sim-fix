@@ -160,6 +160,7 @@ class LocationEstimator:
     elif which == "cameraOdometry":
       # camera odometry is delayed depending on the model context frames and temporal frequency
       t = msg.timestampEof * 1e-9 - CAM_ODO_POSE_DELAY
+      print(f"[CAMODO] gap={self.kf.t - t:.3f}s kf_t={self.kf.t:.3f} t={t:.3f}", flush=True)  # TEMP repro #30693
       if not self._validate_timestamp(t):
         return HandleLogResult.TIMING_INVALID
 

@@ -9,7 +9,7 @@ export FINGERPRINT="HONDA_CIVIC_2022"
 export BLOCK="${BLOCK},camerad,loggerd,encoderd,micd,logmessaged,manage_athenad"
 if [[ "$CI" ]]; then
   # TODO: offscreen UI should work
-  export BLOCK="${BLOCK},ui"
+  export BLOCK="${BLOCK},ui,soundd"  # soundd needs portaudio + an audio device, absent on CI runners
 fi
 
 python3 -c "from openpilot.selfdrive.test.helpers import set_params_enabled; set_params_enabled()"
